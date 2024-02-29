@@ -23,10 +23,6 @@ COCO_INSTANCE_CATEGORY_NAMES = [
 
 def download_video(video_url, output_path):
     try:
-        if os.path.exists(output_path):
-            print(f"The video already exists at: {output_path}")
-            return
-
         yt = YouTube(video_url)
         stream = yt.streams.get_highest_resolution()
         stream.download(output_path)
@@ -34,8 +30,14 @@ def download_video(video_url, output_path):
     except Exception as e:
         print(f"Error downloading video: {str(e)}")
 
-video_url = "https://www.youtube.com/watch?v=wbWRWeVe1XE"
+video_url = ["https://www.youtube.com/watch?v=wbWRWeVe1XE","https://www.youtube.com/watch?v=FlJoBhLnqko","https://www.youtube.com/watch?v=Y-bVwPRy_no"]
 output_path = "/Users/norsangnyandak/Documents/Spring 2024/CS370-102 Introduction to Artificial Intelligence/AI-Object-Detection/Videos"
+
+for url in video_url:
+    download_video(url, output_path)
+    
+
+
 download_video(video_url, output_path)
 
 def safe_filename(filename):
@@ -120,7 +122,7 @@ def extract_frames_and_detect_objects(video_path, model, interval=1):
 
 model = load_model()
 
-VideoTitles = ["What Does High-Quality Preschool Look Like  NPR Ed.mp4"]
+VideoTitles = ["How Green Roofs Can Help Cities  NPR.mp4"]
 # Why Its Usually Hotter In A City  Lets Talk  NPR.mp4
 # What Does High-Quality Preschool Look Like  NPR Ed.mp4
 # How Green Roofs Can Help Cities  NPR.mp4
