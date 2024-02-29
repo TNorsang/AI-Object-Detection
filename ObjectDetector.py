@@ -1,5 +1,5 @@
 from pytube import YouTube
-import cv2  # Import OpenCV
+import cv2  
 import os
 import torch
 from torchvision.models.detection import fasterrcnn_resnet50_fpn
@@ -20,6 +20,23 @@ COCO_INSTANCE_CATEGORY_NAMES = [
     'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator',
     'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush'
 ]
+
+def download_video(video_url, output_path):
+    try:
+        if os.path.exists(output_path):
+            print(f"The video already exists at: {output_path}")
+            return
+
+        yt = YouTube(video_url)
+        stream = yt.streams.get_highest_resolution()
+        stream.download(output_path)
+        print(f"Video downloaded successfully to: {output_path}")
+    except Exception as e:
+        print(f"Error downloading video: {str(e)}")
+
+video_url = "https://www.youtube.com/watch?v=wbWRWeVe1XE"
+output_path = "/Users/norsangnyandak/Documents/Spring 2024/CS370-102 Introduction to Artificial Intelligence/AI-Object-Detection/Videos"
+download_video(video_url, output_path)
 
 def safe_filename(filename):
     """Generate a safe filename for most file systems."""
@@ -103,9 +120,10 @@ def extract_frames_and_detect_objects(video_path, model, interval=1):
 
 model = load_model()
 
-VideoTitles = ["How Green Roofs Can Help Cities  NPR.mp4"]
+VideoTitles = ["What Does High-Quality Preschool Look Like  NPR Ed.mp4"]
 # Why Its Usually Hotter In A City  Lets Talk  NPR.mp4
 # What Does High-Quality Preschool Look Like  NPR Ed.mp4
+# How Green Roofs Can Help Cities  NPR.mp4
 
 for title in VideoTitles:
     video_path = f"/Users/norsangnyandak/Documents/Spring 2024/CS370-102 Introduction to Artificial Intelligence/AI-Object-Detection/Videos/{title}"
