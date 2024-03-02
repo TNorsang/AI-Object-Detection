@@ -108,15 +108,16 @@ def download_video(video_url, output_path):
         stream = yt.streams.get_highest_resolution()
         safe_title = safe_filename(stream.title)
         caption_title = safe_filename(stream.title + " Caption")
-        full_path = os.path.join(output_path, safe_title + ".mp4")
-        caption_path = os.path.join(output_path, caption_title + ".srt")  # Path for the SRT file
+        video_folder = os.path.join(output_path, safe_title)
+        full_path = os.path.join(video_folder, safe_title + ".mp4")
+        caption_path = os.path.join(video_folder, caption_title + ".srt")  # Path for the SRT file
 
         # Make sure the directory exists
-        if not os.path.exists(output_path):
-            os.makedirs(output_path)
+        if not os.path.exists(video_folder):
+            os.makedirs(video_folder)
         
         # Download the video
-        stream.download(output_path, safe_title + ".mp4")
+        stream.download(video_folder, safe_title + ".mp4")
         
         # Write the XML captions to an SRT file
         if caption:
@@ -127,23 +128,10 @@ def download_video(video_url, output_path):
             print("No caption was found.")
             
         print(f"Video downloaded successfully to: {full_path}")
-        return full_path  # Return the full path where the video was saved
+        return video_folder, full_path  # Return the folder path where the video is saved
     except Exception as e:
         print(f"Error downloading video: {str(e)}")
         return None
-
-
-
-
-
-# for url in video_url:
-#     download_video(url, output_path)
-    
-
-
-# download_video(video_url, output_path)
-
-
 
 def load_model():
     model = fasterrcnn_resnet50_fpn(weights=FasterRCNN_ResNet50_FPN_Weights.DEFAULT)
@@ -181,13 +169,14 @@ def draw_bounding_boxes(frame_path, predictions):
             cv2.putText(image, label, (start_point[0], start_point[1]-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
     cv2.imwrite(frame_path.replace('.jpg', '_detected.jpg'), image)
 
-def extract_frames_and_detect_objects(video_path, model, vidId, interval=1):
-    vidcap = cv2.VideoCapture(video_path)
+def extract_frames_and_detect_objects(video_file_path, model, vidId, interval=1):
+    vidcap = cv2.VideoCapture(video_file_path)
+    video_path = os.path.join(video_folder, os.listdir(video_folder)[0])
     success, image = vidcap.read()
     count = 0
     saved_frames = 0
     fps = vidcap.get(cv2.CAP_PROP_FPS)
-    frames_dir = os.path.join(os.path.dirname(video_path), "frames")
+    frames_dir = os.path.join(video_folder, "frames")
     results = []
 
     if not os.path.exists(frames_dir):
@@ -231,6 +220,7 @@ def extract_frames_and_detect_objects(video_path, model, vidId, interval=1):
     columns = ['vidId', 'frameNum', 'timestamp(H:MM:SS)', 'detectedObjId', 'detectedObjClass', 'confidence', 'bbox info']
     return pd.DataFrame(results, columns=columns)
 
+
 model = load_model()
 
 video_urls = [
@@ -241,11 +231,11 @@ video_urls = [
 
 output_path = "/Users/norsangnyandak/Documents/Spring 2024/CS370-102 Introduction to Artificial Intelligence/AI-Object-Detection/Videos"
 
-
 for url in video_urls:
-    local_video_path = download_video(url, output_path)
-    if local_video_path:  # Check for successful download
+    video_folder, video_file_path = download_video(url, output_path)  # Unpack the returned values
+    if video_folder and video_file_path:  # Check if both values are returned successfully
         videoID = random.randrange(100)
-        results_df = extract_frames_and_detect_objects(local_video_path, model, videoID, interval=1)
+        results_df = extract_frames_and_detect_objects(video_file_path, model, videoID, interval=1)  # Pass the direct video file path
         print(results_df)
+
     
